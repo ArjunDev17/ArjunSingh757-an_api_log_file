@@ -14,23 +14,25 @@ var (
 )
 
 func InitLoggers(infoHandle, warningHandle, errorHandle *os.File) {
-	// Get the absolute path of the logs folder
-	logsFolder, err := filepath.Abs(filepath.Join(filepath.Dir(os.Args[0]), "logs"))
-	if err != nil {
-		panic(err)
-	}
+	// Initialize loggers with the log file handles
+	InfoLogger = log.New(infoHandle, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarningLogger = log.New(warningHandle, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
+	ErrorLogger = log.New(errorHandle, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+}
 
+func InitLoggersWithPaths(logsFolderPath string) {
 	// Create the logs folder if it doesn't exist
-	err = os.MkdirAll(logsFolder, os.ModePerm)
+	err := os.MkdirAll(logsFolderPath, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
 
-	// Create log file paths
-	infoLogPath := filepath.Join(logsFolder, "info.log")
-	warningLogPath := filepath.Join(logsFolder, "warning.log")
-	errorLogPath := filepath.Join(logsFolder, "error.log")
+	// Create log file paths using the specified logs folder
+	infoLogPath := filepath.Join(logsFolderPath, "info.log")
+	warningLogPath := filepath.Join(logsFolderPath, "warning.log")
+	errorLogPath := filepath.Join(logsFolderPath, "error.log")
 
+	// Create or open log files
 	infoFile, err := os.Create(infoLogPath)
 	if err != nil {
 		panic(err)
@@ -47,7 +49,5 @@ func InitLoggers(infoHandle, warningHandle, errorHandle *os.File) {
 	}
 
 	// Initialize loggers with the log file handles
-	InfoLogger = log.New(infoFile, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	WarningLogger = log.New(warningFile, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(errorFile, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	InitLoggers(infoFile, warningFile, errorFile)
 }
